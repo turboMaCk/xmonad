@@ -1,15 +1,26 @@
+---------------------------------------------------------------------------
+--                                                                       --
+--     _|      _|  _|      _|                                      _|    --
+--       _|  _|    _|_|  _|_|    _|_|    _|_|_|      _|_|_|    _|_|_|    --
+--         _|      _|  _|  _|  _|    _|  _|    _|  _|    _|  _|    _|    --
+--       _|  _|    _|      _|  _|    _|  _|    _|  _|    _|  _|    _|    --
+--     _|      _|  _|      _|    _|_|    _|    _|    _|_|_|    _|_|_|    --
+--                                                                       --
+---------------------------------------------------------------------------
+-- Marek Fajkus <marek.faj@gmail.com> @turbo_MaCk                        --
+-- https://github.com/turboMaCk                                          --
+---------------------------------------------------------------------------
 import XMonad
-import XMonad.Layout.Grid                 (Grid(Grid))
 import XMonad.Hooks.ManageHelpers         (isFullscreen, doFullFloat)
 import XMonad.Hooks.DynamicLog            (PP, ppVisible, ppCurrent, ppTitle, ppLayout, ppUrgent, statusBar, xmobarColor, xmobarPP, wrap)
 import XMonad.Layout.NoBorders            (smartBorders)
 import XMonad.Layout.Fullscreen           (fullscreenFull)
 import XMonad.Util.SpawnOnce              (spawnOnce)
+import XMonad.Layout.GridVariants
 import qualified XMonad.Hooks.ManageDocks as Docks
 import qualified XMonad.StackSet          as W
 
 import System.Exit                        (ExitCode(ExitSuccess), exitWith)
-
 import Data.Monoid                        (Endo)
 import qualified Data.Map                 as M
 
@@ -33,10 +44,10 @@ myBar = "xmobar"
 
 -- Custom PP, configure it as you like. It determines what is being written to the bar.
 myPP :: PP
-myPP = xmobarPP { ppVisible = xmobarColor "#404040" ""
-                , ppCurrent = xmobarColor "#DF7401" ""
-                , ppTitle = xmobarColor "#FFB6B0" ""
-                , ppLayout = xmobarColor"#790a0a" ""
+myPP = xmobarPP { ppVisible = xmobarColor "#ffffff" ""
+                , ppCurrent = xmobarColor "#2E9AFE" ""
+                , ppTitle = xmobarColor "#888888" ""
+                , ppLayout = xmobarColor "#666666" ""
                 , ppUrgent = xmobarColor "#900000" "" . wrap "[" "]"
                 }
 
@@ -91,13 +102,13 @@ myWorkspaces = clickable . (map xmobarEscape) $
 myKeys conf@(XConfig { XMonad.modMask = modMasq }) = M.fromList $
 
     -- launch a terminal
-    [ ((mod1Mask,              xK_Return), spawn "termite")
+    [ ((mod1Mask .|. shiftMask, xK_Return), spawn "termite")
 
     -- launch dmenu
     , ((modMasq,               xK_p     ), spawn "exe=`dmenu_path | dmenu` && eval \"exec $exe\"")
 
     -- close focused window
-    , ((modMasq,               xK_c     ), kill)
+    , ((modMasq,               xK_q     ), kill)
 
      -- Rotate through the available layout algorithms
     , ((modMasq,               xK_space ), sendMessage NextLayout)
@@ -109,25 +120,26 @@ myKeys conf@(XConfig { XMonad.modMask = modMasq }) = M.fromList $
     , ((modMasq,               xK_n     ), refresh)
 
     -- Move focus to the next window
-    , ((modMasq,               xK_Tab   ), windows W.focusDown)
+    -- , ((modMasq,               xK_Tab   ), windows $ W.swapMaster . W.focusDown . W.focusMaster)
+    , ((modMasq,               xK_Tab     ), windows W.focusDown)
 
     -- Move focus to the next window
     , ((modMasq,               xK_j     ), windows W.focusDown)
 
     -- Move focus to the previous window
-    , ((modMasq,               xK_k     ), windows W.focusUp  )
+    , ((modMasq,               xK_k     ), windows W.focusUp)
 
     -- Move focus to the master window
-    , ((modMasq,               xK_m     ), windows W.focusMaster  )
+    , ((modMasq,               xK_m     ), windows W.focusMaster)
 
     -- Swap the focused window and the master window
-    , ((modMasq .|. shiftMask, xK_Return), windows W.swapMaster)
+    , ((modMasq,               xK_Return), windows W.swapMaster)
 
     -- Swap the focused window with the next window
-    , ((modMasq .|. shiftMask, xK_j     ), windows W.swapDown  )
+    , ((modMasq .|. shiftMask, xK_j     ), windows W.swapDown)
 
     -- Swap the focused window with the previous window
-    , ((modMasq .|. shiftMask, xK_k     ), windows W.swapUp    )
+    , ((modMasq .|. shiftMask, xK_k     ), windows W.swapUp)
 
     -- Shrink the master area
     , ((modMasq,               xK_h     ), sendMessage Shrink)
@@ -154,7 +166,7 @@ myKeys conf@(XConfig { XMonad.modMask = modMasq }) = M.fromList $
     , ((modMasq .|. shiftMask, xK_c     ), io (exitWith ExitSuccess))
 
     -- Restart xmonad
-    , ((modMasq              , xK_q     ), spawn "xmonad --recompile; xmonad --restart")
+    , ((modMasq .|. shiftMask, xK_q     ), spawn "xmonad --recompile; xmonad --restart")
     ]
     ++
 
@@ -187,7 +199,7 @@ myKeys conf@(XConfig { XMonad.modMask = modMasq }) = M.fromList $
 
 myStartupHook :: X ()
 myStartupHook = do
-  spawnOnce "/usr/bin/stalonetray"
+  spawnOnce "stalonetray"
   spawnOnce "nm-applet"
   spawnOnce "volumeicon"
   spawnOnce "dropbox"
@@ -197,15 +209,17 @@ myStartupHook = do
 myManageHook :: Query (Endo WindowSet)
 myManageHook = composeAll
     [ className =? "stalonetray"  --> doIgnore
-    , className =? "Spotify"      --> doFullFloat
+    , className =? "Spotify"      --> doFloat
+    , className =? "Caprine"      --> doFloat
     , Docks.manageDocks
     , isFullscreen                --> (doF W.focusDown <+> doFullFloat)
     ]
 
 
-myLayoutHook = Docks.avoidStruts $ master ||| Grid ||| (fullscreenFull Full)
+myLayoutHook = Docks.avoidStruts $ tall ||| fullscreenFull Full ||| split
   where
-    master = Tall 1 delta $ 2/3
+    tall = Tall 1 delta (2/3)
+    split = SplitGrid L 2 3 (2/3) (16/10) (5/100)
 
 
 -- Percent of screen to increment by when resizing panes
