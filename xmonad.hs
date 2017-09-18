@@ -15,7 +15,6 @@ import XMonad.Hooks.ManageHelpers         (isFullscreen, doFullFloat)
 import XMonad.Hooks.DynamicLog            (PP, ppVisible, ppCurrent, ppTitle, ppLayout, ppUrgent, statusBar, xmobarColor, xmobarPP, wrap)
 import XMonad.Layout.NoBorders            (smartBorders)
 import XMonad.Layout.Fullscreen           (fullscreenFull)
-import XMonad.Util.SpawnOnce              (spawnOnce)
 import XMonad.Layout.GridVariants
 import qualified XMonad.Hooks.ManageDocks as Docks
 import qualified XMonad.StackSet          as W
@@ -102,7 +101,10 @@ myWorkspaces = clickable . (map xmobarEscape) $
 myKeys conf@(XConfig { XMonad.modMask = modMasq }) = M.fromList $
 
     -- launch a terminal
-    [ ((mod1Mask .|. shiftMask, xK_Return), spawn "termite")
+    [ ((mod1Mask .|. shiftMask, xK_t), spawn "termite")
+
+    -- launch a browser
+    , ((mod1Mask .|. shiftMask, xK_b    ), spawn "chromium")
 
     -- launch dmenu
     , ((modMasq,               xK_p     ), spawn "exe=`dmenu_path | dmenu` && eval \"exec $exe\"")
@@ -166,7 +168,7 @@ myKeys conf@(XConfig { XMonad.modMask = modMasq }) = M.fromList $
     , ((modMasq .|. shiftMask, xK_c     ), io (exitWith ExitSuccess))
 
     -- Restart xmonad
-    , ((modMasq .|. shiftMask, xK_q     ), spawn "xmonad --recompile; xmonad --restart")
+    , ((modMasq .|. shiftMask, xK_q     ), spawn "xmonad --recompile; ~/.xmonad/kill.sh; xmonad --restart")
     ]
     ++
 
@@ -192,6 +194,7 @@ myKeys conf@(XConfig { XMonad.modMask = modMasq }) = M.fromList $
         , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
 
 
+
 -------------------------------
 -- spawn processes
 -------------------------------
@@ -199,17 +202,13 @@ myKeys conf@(XConfig { XMonad.modMask = modMasq }) = M.fromList $
 
 myStartupHook :: X ()
 myStartupHook = do
-  spawnOnce "stalonetray"
-  spawnOnce "nm-applet"
-  spawnOnce "volumeicon"
-  spawnOnce "dropbox"
-  spawnOnce "compton -cb"
-
+  spawn "$HOME/.xmonad/startup.sh"
 
 myManageHook :: Query (Endo WindowSet)
 myManageHook = composeAll
     [ className =? "stalonetray"  --> doIgnore
     , className =? "Spotify"      --> doFloat
+    , className =? "feh"          --> doFloat
     , className =? "Caprine"      --> doFloat
     , Docks.manageDocks
     , isFullscreen                --> (doF W.focusDown <+> doFullFloat)
