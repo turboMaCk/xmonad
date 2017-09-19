@@ -45,9 +45,9 @@ myBar = "xmobar"
 myPP :: PP
 myPP = xmobarPP { ppVisible = xmobarColor "#ffffff" ""
                 , ppCurrent = xmobarColor "#2E9AFE" ""
-                , ppTitle = xmobarColor "#888888" ""
-                , ppLayout = xmobarColor "#666666" ""
-                , ppUrgent = xmobarColor "#900000" "" . wrap "[" "]"
+                , ppTitle   = xmobarColor "#888888" ""
+                , ppLayout  = xmobarColor "#666666" ""
+                , ppUrgent  = xmobarColor "#900000" "" . wrap "[" "]"
                 }
 
 
@@ -76,19 +76,26 @@ xmobarEscape = concatMap doubleLts
         doubleLts x   = [x]
 
 
+webW = "\xf268"
+codeW = "\xf121"
+communicateW = "\xf086"
+terminalW = "\xf120"
+musicW = "\xf1bc"
+
+
 myWorkspaces :: [String]
 myWorkspaces = clickable . (map xmobarEscape) $
-  [ "1:browser"
-  , "2:code"
-  , "3:comunicate"
-  , "4:custom"
-  , "5:custom"
-  , "6:custom"
-  , "7:custom"
-  , "8:custom"
-  , "9:custom" ]
+  [ webW
+  , codeW
+  , communicateW
+  , terminalW
+  , musicW
+  , terminalW
+  , terminalW
+  , terminalW
+  , terminalW ]
   where
-    clickable l = [ "<action=xdotool key alt+" ++ show n ++ ">" ++ ws ++ "</action>" |
+    clickable l = [ "<action=xdotool key alt+" ++ show n ++ ">" ++ show n ++ " " ++ ws ++ "</action>" |
                     (i , ws) <- zip [1..9] l,
                     let n = i ]
 
@@ -168,7 +175,7 @@ myKeys conf@(XConfig { XMonad.modMask = modMasq }) = M.fromList $
     , ((modMasq .|. shiftMask, xK_c     ), io (exitWith ExitSuccess))
 
     -- Restart xmonad
-    , ((modMasq .|. shiftMask, xK_q     ), spawn "xmonad --recompile; ~/.xmonad/kill.sh; xmonad --restart")
+    , ((modMasq .|. shiftMask, xK_q     ), spawn "xmonad --recompile; ~/.xmonad/kill.sh; notify-send \"XMonad\" \"Reloaded!\"; xmonad --restart")
     ]
     ++
 
@@ -208,6 +215,9 @@ myManageHook :: Query (Endo WindowSet)
 myManageHook = composeAll
     [ className =? "stalonetray"  --> doIgnore
     , className =? "Spotify"      --> doFloat
+    , className =? "Slack"        --> doShift "3"
+    , className =? "Thunderbird"  --> doShift communicateW
+    , className =? "Evolution"    --> doShift communicateW
     , className =? "feh"          --> doFloat
     , className =? "Caprine"      --> doFloat
     , Docks.manageDocks
@@ -215,12 +225,15 @@ myManageHook = composeAll
     ]
 
 
+-------------------------------
+-- layouts
+-------------------------------
+
 myLayoutHook = Docks.avoidStruts $ tall ||| fullscreenFull Full ||| split
   where
-    tall = Tall 1 delta (2/3)
+    tall = Tall 1 (3/100) (2/3)
     split = SplitGrid L 2 3 (2/3) (16/10) (5/100)
 
-
--- Percent of screen to increment by when resizing panes
-delta :: Rational
-delta = 3/100
+-- Local Variables:
+-- flycheck-ghc-args: ("-Wno-missing-signatures")
+-- End:
