@@ -5,9 +5,14 @@
 ##################
 # This script should be fired when xmonad is starging
 
+composite
 numlockx on &
 feh --bg-fill ~/.xmonad/wallpaper.jpg &
 stalonetray &
 dropbox &
 caprine &
-volumeicon
+volumeicon &
+redshift-gtk &
+rescuetime &
+browserpass &
+xmodmap ~/.xmonad/Xmodmap

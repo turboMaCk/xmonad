@@ -8,4 +8,8 @@
 killall stalonetray \
         dropbox \
         caprine \
-        volumeicon
+        volumeicon \
+        redshift \
+        rescuetime \
+        browserpass \
+        composite

@@ -220,6 +220,7 @@ myManageHook = composeAll
     , className =? "Evolution"    --> doShift communicateW
     , className =? "feh"          --> doFloat
     , className =? "Caprine"      --> doFloat
+    , className =? "pinentry"     --> doFloat
     , Docks.manageDocks
     , isFullscreen                --> (doF W.focusDown <+> doFullFloat)
     ]
