@@ -58,7 +58,7 @@ toggleStrutsKey XConfig { XMonad.modMask = modM } = ( modM, xK_b )
 
 -- Main configuration, override the defaults to your liking.
 myConfig = def { modMask            = mod1Mask
-               , terminal           = "termite"
+               , terminal           = "alacritty"
                , workspaces         = myWorkspaces
                , keys               = myKeys
                , layoutHook         = smartBorders $ myLayoutHook
@@ -108,7 +108,7 @@ myWorkspaces = clickable . (map xmobarEscape) $
 myKeys conf@(XConfig { XMonad.modMask = modMasq }) = M.fromList $
 
     -- launch a terminal
-    [ ((mod1Mask .|. shiftMask, xK_t), spawn "termite")
+    [ ((mod1Mask .|. shiftMask, xK_t), spawn "alacritty")
 
     -- launch a browser
     , ((mod1Mask .|. shiftMask, xK_b    ), spawn "chromium")
