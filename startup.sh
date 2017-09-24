@@ -5,7 +5,7 @@
 ##################
 # This script should be fired when xmonad is starging
 
-composite
+compton
 numlockx on &
 feh --bg-fill ~/.xmonad/wallpaper.jpg &
 stalonetray &
