@@ -11,5 +11,4 @@ killall stalonetray \
         volumeicon \
         redshift \
         rescuetime \
-        browserpass \
-        composite
+        browserpass
