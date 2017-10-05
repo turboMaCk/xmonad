@@ -16,6 +16,7 @@ import XMonad.Hooks.DynamicLog            (PP, ppVisible, ppCurrent, ppTitle, pp
 import XMonad.Layout.NoBorders            (smartBorders)
 import XMonad.Layout.Fullscreen           (fullscreenFull)
 import XMonad.Layout.GridVariants
+import XMonad.Layout.Spacing              (spacingWithEdge)
 import qualified XMonad.Hooks.ManageDocks as Docks
 import qualified XMonad.StackSet          as W
 
@@ -79,6 +80,7 @@ xmobarEscape = concatMap doubleLts
 webW = "\xf268"
 codeW = "\xf121"
 communicateW = "\xf086"
+emailW "\xf003"
 terminalW = "\xf120"
 musicW = "\xf1bc"
 
@@ -88,14 +90,14 @@ myWorkspaces = clickable . (map xmobarEscape) $
   [ webW
   , codeW
   , communicateW
-  , terminalW
+  , emailW
   , musicW
   , terminalW
   , terminalW
   , terminalW
   , terminalW ]
   where
-    clickable l = [ "<action=xdotool key alt+" ++ show n ++ ">" ++ show n ++ " " ++ ws ++ "</action>" |
+    clickable l = [ "<action=xdotool key alt+" ++ show n ++ ">" ++ ws ++ "</action>" |
                     (i , ws) <- zip [1..9] l,
                     let n = i ]
 
@@ -165,12 +167,6 @@ myKeys conf@(XConfig { XMonad.modMask = modMasq }) = M.fromList $
     -- Deincrement the number of windows in the master area
     , ((modMasq              , xK_period), sendMessage (IncMasterN (-1)))
 
-    -- Toggle the status bar gap
-    -- Use this binding with avoidStruts from Hooks.ManageDocks.
-    -- See also the statusBar function from Hooks.DynamicLog.
-    --
-    -- , ((modm              , xK_b     ), sendMessage ToggleStruts)
-
     -- Quit xmonad
     , ((modMasq .|. shiftMask, xK_c     ), io (exitWith ExitSuccess))
 
@@ -230,7 +226,7 @@ myManageHook = composeAll
 -- layouts
 -------------------------------
 
-myLayoutHook = Docks.avoidStruts $ tall ||| fullscreenFull Full ||| split
+myLayoutHook = spacingWithEdge 5 $ Docks.avoidStruts $ tall ||| fullscreenFull Full ||| split
   where
     tall = Tall 1 (3/100) (2/3)
     split = SplitGrid L 2 3 (2/3) (16/10) (5/100)
