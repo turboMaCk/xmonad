@@ -45,9 +45,9 @@ myBar = "xmobar"
 -- Custom PP, configure it as you like. It determines what is being written to the bar.
 myPP :: PP
 myPP = xmobarPP { ppVisible = xmobarColor "#ffffff" ""
-                , ppCurrent = xmobarColor "#2E9AFE" ""
-                , ppTitle   = xmobarColor "#888888" ""
-                , ppLayout  = xmobarColor "#666666" ""
+                , ppCurrent = xmobarColor "#222222" "#2E9AFE"
+                , ppTitle   = xmobarColor "#2E9AFE" ""
+                , ppLayout  = xmobarColor "#888888" ""
                 , ppUrgent  = xmobarColor "#900000" "" . wrap "[" "]"
                 }
 
@@ -59,7 +59,7 @@ toggleStrutsKey XConfig { XMonad.modMask = modM } = ( modM, xK_b )
 
 -- Main configuration, override the defaults to your liking.
 myConfig = def { modMask            = mod1Mask
-               , terminal           = "alacritty"
+               , terminal           = "urxvt"
                , workspaces         = myWorkspaces
                , keys               = myKeys
                , layoutHook         = smartBorders $ myLayoutHook
@@ -80,7 +80,7 @@ xmobarEscape = concatMap doubleLts
 webW = "\xf268"
 codeW = "\xf121"
 communicateW = "\xf086"
-emailW "\xf003"
+emailW = "\xf0e0"
 terminalW = "\xf120"
 musicW = "\xf1bc"
 
@@ -97,7 +97,7 @@ myWorkspaces = clickable . (map xmobarEscape) $
   , terminalW
   , terminalW ]
   where
-    clickable l = [ "<action=xdotool key alt+" ++ show n ++ ">" ++ ws ++ "</action>" |
+    clickable l = [ " <action=xdotool key alt+" ++ show n ++ ">" ++ ws ++ "</action> " |
                     (i , ws) <- zip [1..9] l,
                     let n = i ]
 
@@ -110,10 +110,13 @@ myWorkspaces = clickable . (map xmobarEscape) $
 myKeys conf@(XConfig { XMonad.modMask = modMasq }) = M.fromList $
 
     -- launch a terminal
-    [ ((mod1Mask .|. shiftMask, xK_t), spawn "alacritty")
+    [ ((mod1Mask .|. shiftMask, xK_t), spawn "urxvt")
 
     -- launch a browser
     , ((mod1Mask .|. shiftMask, xK_b    ), spawn "chromium")
+
+    -- launch emacs client frame
+    , ((mod1Mask .|. shiftMask, xK_o    ), spawn "emacsclient -n -c")
 
     -- launch dmenu
     , ((modMasq,               xK_p     ), spawn "exe=`dmenu_path | dmenu` && eval \"exec $exe\"")
@@ -211,10 +214,8 @@ myManageHook :: Query (Endo WindowSet)
 myManageHook = composeAll
     [ className =? "stalonetray"  --> doIgnore
     , className =? "Spotify"      --> doFloat
-    , className =? "Slack"        --> doShift "3"
-    , className =? "Thunderbird"  --> doShift communicateW
-    , className =? "Evolution"    --> doShift communicateW
-    , className =? "feh"          --> doFloat
+    , className =? "Slack"        --> doShift communicateW
+    , className =? "Thunderbird"  --> doShift emailW
     , className =? "Caprine"      --> doFloat
     , className =? "pinentry"     --> doFloat
     , Docks.manageDocks
@@ -226,10 +227,12 @@ myManageHook = composeAll
 -- layouts
 -------------------------------
 
-myLayoutHook = spacingWithEdge 5 $ Docks.avoidStruts $ tall ||| fullscreenFull Full ||| split
+myLayoutHook = Docks.avoidStruts $ withSpaces tall ||| fullscreenFull Full ||| withSpaces half
   where
     tall = Tall 1 (3/100) (2/3)
-    split = SplitGrid L 2 3 (2/3) (16/10) (5/100)
+    half = Tall 1 (3/100) (1/2)
+    withSpaces layout =
+      spacingWithEdge 5 $ layout
 
 -- Local Variables:
 -- flycheck-ghc-args: ("-Wno-missing-signatures")
